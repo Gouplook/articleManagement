@@ -16,6 +16,8 @@ func (a *AtricleController)ShowArticleList(){
 	//session判断
 
 	// 获取数据（高级查询）
+	//obj := orm.NewOrm()
+	//qs := obj.QueryTable("Article")
 
 	//查询总记录数
 
