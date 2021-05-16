@@ -13,4 +13,5 @@ type ArticleType struct {
 	TypeName string `orm:"size(20)"`
 
 	Articles []*Article `orm:"reverse(many)"`
+
 }
