@@ -44,16 +44,18 @@
             </tr>
 
             {{/* 数据操作 遍历数据*/}}
+            {{ range .types }}
             <tr>
-                <td>1</td>
-                <td>体育新闻</td>
+                <td>{{ .Id }}</td>
+                <td>{{ .TypeName }}</td>
                 <td><a href="javascript:;" class="edit">删除</a></td>
             </tr>
+            {{ end }}
 
 
             <tr>
                 <td colspan="3">
-                    <form method="post" action="xxxx">
+                    <form method="post" action="/article/addArticle">
                         <input type="text" class="type_txt" placeholder="添加分类" name="typeName">
                         <input type="submit" class="addtype" value="增加分类">
                     </form>

@@ -63,10 +63,10 @@ func (u *UserController) HandleLogin() {
 	//1.获取数据
 	userName := u.GetString("userName")
 	pwd := u.GetString("password")
-	// userName = strings.Trim(userName," ")
 
 	//2.校验数据
 	if userName == "" || pwd == "" {
+		u.Data["errmsg"] = "登陆信息为空，请重新输入"
 		return
 	}
 
@@ -85,7 +85,6 @@ func (u *UserController) HandleLogin() {
 		return
 	}
 
-	fmt.Println("ok----")
 	// 返回页面
 	u.Redirect("/showArticleList",302)
 

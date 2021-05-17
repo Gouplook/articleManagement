@@ -52,7 +52,8 @@
 
             <tr>
                 <td colspan="3">
-                    <form>
+                    <!--提交表单时 向何处发送表单数据（URL）  -->
+                    <form action="/article/addArticle" method="post" enctype="multipart/form-data">
                         <input type="text" class="type_txt" placeholder="添加分类" name="typeName">
                         <input type="submit" class="addtype" value="增加分类">
                     </form>
@@ -62,6 +63,7 @@
     </div>
 </div>
 
+    <div> {{.errMsg}}</div>
 
 </body>
 </html>
