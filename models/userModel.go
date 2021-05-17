@@ -16,7 +16,7 @@ type User struct {
 	Id int
 	Name string
 	PassWord string
-	//Pass_Word
-	//Articles []*Article `orm:"reverse(many)"`
+
+	// Articles []*Article `orm:"reverse(many)"`
 
 }

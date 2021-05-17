@@ -20,7 +20,7 @@ type Article struct {
 	Acontent string    `orm:"size(500)"`
 	Aimg     string    `orm:"size(100)"`
 
-	//ArticleType *ArticleType `orm:"rel(fk);on_delete(set_null);null"`
-	ArticleType *ArticleType `orm:"rel(fk)"`
-	//Users       []*User      `orm:"rel(m2m)"`
+	ArticleType *ArticleType `orm:"rel(fk);on_delete(set_null);null"`
+	// ArticleType *ArticleType `orm:"rel(fk)"`
+	// Users       []*User      `orm:"rel(m2m)"`
 }

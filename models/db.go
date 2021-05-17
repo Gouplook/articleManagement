@@ -26,7 +26,7 @@ func init(){
 
 	//生成表
 	//第一个参数是数据库别名，第二个参数是是否强制更新(多表操作时需要强制更新）
-	_ = orm.RunSyncdb("default", true, true)
+	_ = orm.RunSyncdb("default", false, true)
 
 	// 设置数据库的最大空闲连接
 	orm.SetMaxIdleConns("default", 30)
