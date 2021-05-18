@@ -202,12 +202,13 @@ func (a *AtricleController) ShowAddType() {
 	obj := orm.NewOrm()
 	var types []models.ArticleType
 	id, _ := obj.QueryTable("ArticleType").All(&types)
+
 	if id < 0 {
 		// 需要收集日志...
 		return
 	}
 
-	// 传提数据到页面
+	// 传递数据到页面
 	a.Data["types"] = types
 	a.TplName = "addType.html"
 }
