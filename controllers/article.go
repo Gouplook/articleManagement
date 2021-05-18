@@ -4,6 +4,7 @@ import (
 	"article_management/models"
 	"github.com/beego/beego/v2/client/orm"
 	"github.com/beego/beego/v2/server/web"
+	"math"
 	"path"
 	"strings"
 	"time"
@@ -18,16 +19,66 @@ func (a *AtricleController) ShowArticleList() {
 	// session判断
 
 	// 获取数据（高级查询）
-	// obj := orm.NewOrm()
-	// qs := obj.QueryTable("Article")
+	obj := orm.NewOrm()
+	var articles []models.Article
+	id,_ := obj.QueryTable("Article").All(&articles)
+	if id < 0 {
+		// 需要收集日志...
+		return
+	}
 
-	// 查询总记录数
-
-	// 分页处理
+	// 每页显示的多少条
+	pageSize := 2
+	// （页码）获取前端传过来的页码
+	pageIndex,err := a.GetInt("xxxx")
+	if err != nil {
+		pageIndex = 1
+	}
+	//起始位置计算
+	start := ( pageIndex - 1) * pageSize
+	typeName := a.GetString("select")
+	var count int64
+	if typeName == "" {
+		// 查询总记录数
+		count, _ = obj.QueryTable("Article").Count()
+	}else {
+		count,_ = obj.QueryTable("Article").
+			Limit(pageSize,start).
+			RelatedSel("ArticleType").
+			Filter("ArticleType__TypeName",typeName).Count()
+	}
 	// 获取总页数
+	pageCount := math.Ceil(float64(count) / float64(pageSize))
+
+	// 获取文章类型
+	var types []models.ArticleType
+	id,_ = obj.QueryTable("ArticleType").All(&types)
+	if id < 0 {
+		// 需要收集日志...
+		return
+	}
+
+	if typeName != "" {
+		id,_ = obj.QueryTable("Article").
+			Limit(pageSize,start).
+			RelatedSel("ArticleType").
+			Filter("ArticleType__TypeName",typeName).
+			All(&articles)
+	}
+	if id < 0 {
+		// 需要收集日志...
+		return
+	}
+
+
 
 	// 需要传送数据到页面
-	a.Data["xxx"] = "xxxxx"
+	a.Data["articles"] = articles
+	a.Data["count"] = count
+	a.Data["types"] = types
+	a.Data["pageCount"] = int(pageCount)
+	a.Data["pageIndex"] = pageIndex
+	a.Data["typeName"] = typeName
 
 	// 返回视图
 	a.TplName = "index.html"
@@ -36,17 +87,20 @@ func (a *AtricleController) ShowArticleList() {
 // 展示添加文章页面
 func (a *AtricleController) ShowAddArticle() {
 	// 查询所有类型数据，并展示
-	o := orm.NewOrm()
+	obj := orm.NewOrm()
 	var types []models.ArticleType
-	o.QueryTable("ArticleType").All(&types)
-
+	id,_ := obj.QueryTable("ArticleType").All(&types)
+	if id < 0 {
+		// 需要收集日志...
+		return
+	}
 	// 传递数据(查询的数据传提给页面）
 	a.Data["types"] = types
 	a.TplName = "add.html"
 
 }
 
-// 获取添加文章数据 (post)
+// 添加文章数据 (post)
 func (a *AtricleController) HandleAddArticle() {
 	// 1.获取数据
 	articleName := a.GetString("articleName")
@@ -89,14 +143,15 @@ func (a *AtricleController) HandleAddArticle() {
 	fileName := timeStr + ext
 
 	// 存储
+	// 第一个参数 页面的input 的name
 	_ = a.SaveToFile("uploadName", ".static/img/"+fileName)
 
 	// 3.处理数据(数据插入数据库）
-	var artice models.Article
-	artice.ArtiName = articleName
-	artice.Acontent = articleContent
-	artice.Aimg = ".static/img/" + fileName
-	artice.Atime = time.Now()
+	var article models.Article
+	article.ArtiName = articleName
+	article.Acontent = articleContent
+	article.Aimg = ".static/img/" + fileName
+	article.Atime = time.Now()
 
 	// 给文章添加类型 获取类型数据
 	typeName := a.GetString("select")
@@ -113,7 +168,7 @@ func (a *AtricleController) HandleAddArticle() {
 	// artice.ArticleType = &articType
 
 	// 添加的文章表插入
-	id, _ := obj.Insert(&artice)
+	id, _ := obj.Insert(&article)
 	if id < 0 {
 		// 需要收集日志
 		return
