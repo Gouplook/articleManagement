@@ -75,7 +75,7 @@ func (u *UserController) HandleLogin() {
 		Name: userName,
 	}
 	obj := orm.NewOrm()
-	err := obj.Read(&user)
+	err := obj.Read(&user,"Name")
 	if err == orm.ErrNoRows{
 		fmt.Println("查询不到")
 		return
@@ -86,7 +86,7 @@ func (u *UserController) HandleLogin() {
 	}
 
 	// 返回页面
-	u.Redirect("/showArticleList",302)
+	u.Redirect("/article/showArticleList",302)
 
 }
 

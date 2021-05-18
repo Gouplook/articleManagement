@@ -36,10 +36,12 @@
     <div class="breadcrub"> 当前位置：文章管理>添加文章</div>
 
     <div class="pannel">
-        <!-- form    表单用于向服务器传输数据
+        <!--
+             form    表单用于向服务器传输数据
              action  当提交表单时向何处发送表单数据(URL)
              method  规定用于发送 form-data 的 HTTP 方法(get post)
-             enctype 属性规定在发送到服务器之前应该如何对表单数据进行编码  -->
+             enctype 属性规定在发送到服务器之前应该如何对表单数据进行编码  上传文件必须添加这个属性multipart/form-data
+         -->
         <form action="/article/addArticle" method="post" enctype="multipart/form-data">
             <h3 class="review_title">添加文章</h3>
             <div class="form_group">
@@ -50,9 +52,6 @@
             <div class="form_group">
                 <label>文章类型：</label>
                 <select name="select" id="" class="sel_opt">
-                    <!--                    <option value="">体育新闻</option>-->
-                    <!--                    <option value="">财经新闻</option>-->
-                    <!--                    <option value="">科技新闻</option>-->
                     {{ range .types}}
                         <option value="">{{.TypeName}}</option>
                     {{end }}
@@ -70,14 +69,12 @@
             </div>
             <div class="form_group indent_group line_top">
                 <input type="submit" value="添 加" class="confirm">
-                <span>{{.errmsg}}</span>
+                <span>{{.errMsg}}</span>
             </div>
-
         </form>
     </div>
 </div>
 
 
-<div> {{.errMsg}}</div>
 </body>
 </html>

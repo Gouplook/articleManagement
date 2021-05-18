@@ -54,7 +54,7 @@
             {{ range $index,$val := .articles }}
             <tr>
                 <td>{{ $val.ArtiName}}</td>
-                <td><a href="#">查看详情</a></td>
+                <td><a href="/article/showArticleDetail?id={{ $val.Id}}">查看详情</a></td>
                 <td>{{  $val.Atime.Formt "2006-01-02 15:04:05" }}</td>
                 <td>{{  $val.Acount}}</td>
                 <td><a href="#" class="dels">删除</a></td>
@@ -65,11 +65,11 @@
         </table>
         <ul class="pagenation">
             <!-- href="#" 跳到页首，会使页面不经意间跳转-->
-            <li><a href="#">首页</a></li>
+            <li><a href="/article/showArticleList?pageIndex=1">首页</a></li>
             <!-- javascript:; 表示什么都不执行，这样点击a标签时就没有任何反应  -->
-            <li><a href="javascript:;">上一页</a></li>
-            <li><a href="javascript:;">下一页</a></li>
-            <li><a href="#">末页</a></li>
+            <li><a href="/article/showArticleList?pageIndex={{ .pageIndex | pagepre}}">上一页</a></li>
+            <li><a href="/article/showArticleList?pageIndex={{ nextpage .pageIndex .pageCount }}">下一页</a></li>
+            <li><a href="/article/showArticleList/pageIndex={{.count}}">末页</a></li>
             <li>共{{.count}}条记录/共{{.pageCount}}页/当前{{.pageIndex}}页</li>
         </ul>
     </div>

@@ -21,6 +21,7 @@ type Article struct {
 	Aimg     string    `orm:"size(100)"`
 
 	ArticleType *ArticleType `orm:"rel(fk);on_delete(set_null);null"`
+
 	// ArticleType *ArticleType `orm:"rel(fk)"`
 	// Users       []*User      `orm:"rel(m2m);rel_table(the_table_name)"`
 	// Users       []*User      `orm:"rel(m2m)"`

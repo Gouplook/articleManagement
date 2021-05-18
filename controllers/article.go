@@ -18,33 +18,32 @@ type AtricleController struct {
 func (a *AtricleController) ShowArticleList() {
 	// session判断
 
+
 	// 获取数据（高级查询）
 	obj := orm.NewOrm()
+	article := new(models.Article)
 	var articles []models.Article
-	id,_ := obj.QueryTable("Article").All(&articles)
-	if id < 0 {
-		// 需要收集日志...
-		return
-	}
+	// qs := obj.QueryTable(&models.Article{})  // 直接使用 Model 结构体作为表名
+	qs := obj.QueryTable(article)
 
-	// 每页显示的多少条
-	pageSize := 2
+	pageSize := 2 // 自定义每页显示的条数
 	// （页码）获取前端传过来的页码
-	pageIndex,err := a.GetInt("xxxx")
+	pageIndex,err := a.GetInt("pageIndex")
 	if err != nil {
 		pageIndex = 1
 	}
-	//起始位置计算
+	//起始位置计算 （筛选数据时候需要，需要提供多少条数据给前端）
 	start := ( pageIndex - 1) * pageSize
 	typeName := a.GetString("select")
+	articleType := new(models.ArticleType)
 	var count int64
 	if typeName == "" {
 		// 查询总记录数
-		count, _ = obj.QueryTable("Article").Count()
+		count, _ = qs.Count()
 	}else {
-		count,_ = obj.QueryTable("Article").
+		count, _ = qs.
 			Limit(pageSize,start).
-			RelatedSel("ArticleType").
+			RelatedSel(articleType).
 			Filter("ArticleType__TypeName",typeName).Count()
 	}
 	// 获取总页数
@@ -52,16 +51,17 @@ func (a *AtricleController) ShowArticleList() {
 
 	// 获取文章类型
 	var types []models.ArticleType
-	id,_ = obj.QueryTable("ArticleType").All(&types)
+
+	id,_ := obj.QueryTable(articleType).All(&types) // 直接使用对象作为表名
 	if id < 0 {
 		// 需要收集日志...
 		return
 	}
 
 	if typeName != "" {
-		id,_ = obj.QueryTable("Article").
+		id,_ = qs.
 			Limit(pageSize,start).
-			RelatedSel("ArticleType").
+			RelatedSel(articleType).
 			Filter("ArticleType__TypeName",typeName).
 			All(&articles)
 	}
@@ -69,7 +69,6 @@ func (a *AtricleController) ShowArticleList() {
 		// 需要收集日志...
 		return
 	}
-
 
 
 	// 需要传送数据到页面
@@ -89,7 +88,8 @@ func (a *AtricleController) ShowAddArticle() {
 	// 查询所有类型数据，并展示
 	obj := orm.NewOrm()
 	var types []models.ArticleType
-	id,_ := obj.QueryTable("ArticleType").All(&types)
+	articleType := new(models.ArticleType)
+	id,_ := obj.QueryTable(articleType).All(&types)
 	if id < 0 {
 		// 需要收集日志...
 		return
@@ -144,26 +144,26 @@ func (a *AtricleController) HandleAddArticle() {
 
 	// 存储
 	// 第一个参数 页面的input 的name
-	_ = a.SaveToFile("uploadName", ".static/img/"+fileName)
+	_ = a.SaveToFile("uploadName", "./static/img/"+fileName)
 
 	// 3.处理数据(数据插入数据库）
 	var article models.Article
 	article.ArtiName = articleName
 	article.Acontent = articleContent
-	article.Aimg = ".static/img/" + fileName
+	article.Aimg = "./static/img/" + fileName
 	article.Atime = time.Now()
 
 	// 给文章添加类型 获取类型数据
-	typeName := a.GetString("select")
-	// 根据名称查询类型
-	var articType models.ArticleType
-	articType.TypeName = typeName
+	// typeName := a.GetString("select")
+	// // 根据名称查询类型
+	// var articType models.ArticleType
+	// articType.TypeName = typeName
 	obj := orm.NewOrm()
-	err = obj.Read(&articType, "TypeName")
-	if err != nil {
-		// 需要收集日志
-		return
-	}
+	// err = obj.Read(&articType, "TypeName")
+	// if err != nil {
+	// 	// 需要收集日志
+	// 	return
+	// }
 	// 后续 ....
 	// artice.ArticleType = &articType
 
@@ -175,19 +175,40 @@ func (a *AtricleController) HandleAddArticle() {
 	}
 
 	// 4.返回页面
-	a.Redirect("/ShowArticleList", 302)
+	a.Redirect("/article/showArticleList", 302)
 }
 
 // 展示文章详情页面
 func (a *AtricleController) ShowArticleDetail() {
 	// 	获取数据
-
+	id,_ := a.GetInt("Id")
 	// 数据校验
+	if id < 0 {
+		//
+		return
+	}
 
 	// 查询数据
-	// obj := orm.NewOrm()
+	obj := orm.NewOrm()
+	var article models.Article
+	article.Id = id
+
+	err := obj.Read(&article)
+	if err != nil {
+		//需要收集日志
+		return
+	}
 
 	// 修改阅读量 *** update
+	article.Acount += 1
+	_,err = obj.Update(&article)
+	if err != nil {
+		//需要收集日志
+		return
+	}
+
+	// var articleType models.ArticleType
+	// obj.Read(&a)
 
 	// 多对多 插入浏览记录 ****
 	// 1 获取orm对象
@@ -198,10 +219,13 @@ func (a *AtricleController) ShowArticleDetail() {
 
 	// obj.QueryM2M()
 
-	// 返回视图页面
+	// 数据传送到页面
+	a.Data["article"] = article
 
-	a.Layout = "layout.html"
-	a.TplName = "index.html"
+
+	// 返回视图页面
+	// a.Layout = "layout.html"
+	a.TplName = "content.html"
 
 }
 
@@ -256,7 +280,8 @@ func (a *AtricleController) ShowAddType() {
 	// 使用高级查询 atricleType
 	obj := orm.NewOrm()
 	var types []models.ArticleType
-	id, _ := obj.QueryTable("ArticleType").All(&types)
+	articleType := new(models.ArticleType)
+	id, _ := obj.QueryTable(articleType).All(&types)
 
 	if id < 0 {
 		// 需要收集日志...
@@ -284,11 +309,15 @@ func (a *AtricleController) HandleAddType() {
 	// 插入数据之前对数据进行查找
 	obj := orm.NewOrm()
 
-	// 数据插入insert
-	id, _ := obj.Insert(&artileType)
-	if id < 0 {
-		// 需要收集日志...
+	// 数据查找并创建，不存在就创建，存在
+	created,_,err := obj.ReadOrCreate(&artileType,"TypeName")
+	if err != nil {
+		// 需要收集日志
 		return
+
+	}
+	if !created {
+		a.Data["errMsg"] = "类型名已存在"
 	}
 
 	// 返回视图 /article/addArticle
